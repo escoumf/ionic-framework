@@ -5,13 +5,14 @@ inputs:
     description: 'Playwright Test Shard (ex: 2)'
   totalShards:
     description: 'Playwright total number of test shards (ex: 4)'
+  update:
+    description: 'Whether or not to update the update the reference snapshots'
 runs:
   using: 'composite'
   steps:
     - uses: actions/setup-node@v1
       with:
         node-version: 15.x
-
     - name: Cache Core Node Modules
       uses: actions/cache@v2
       env:
@@ -34,7 +35,26 @@ runs:
       shell: bash
       working-directory: ./core
     - name: Test
-      run: npx playwright test --shard=${{ inputs.shard }}/${{ inputs.totalShards }}
+      run: |
+        args=(
+          --shard=${{ inputs.shard }}/${{ inputs.totalShards }}
+        )
+
+        if [ "${{ inputs.update }}" = "true" ]; then
+          args+=(--update-snapshots)
+        fi
+
+        npx playwright test ${args}
+      shell: bash
+      working-directory: ./core
+    - name: Push Snapshot Updates
+      if: inputs.update == "true"
+      run: |
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git add .
+        git commit -m "test(): updated snapshots from shard ${{ inputs.shard }} of ${{ inputs.totalShards }}"
+        git push
       shell: bash
       working-directory: ./core
     - name: Archive Test Results
@@ -44,7 +64,7 @@ runs:
       # even if the test fails in the previous
       # step, otherwise there would be no way
       # to debug these tests.
-      if: always()
+      if: inputs.update != "true"
       uses: ./.github/workflows/actions/upload-archive
       with:
         name: test-core-screenshot (${{ inputs.shard }}, ${{ inputs.totalShards }})
