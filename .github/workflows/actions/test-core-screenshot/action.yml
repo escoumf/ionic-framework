@@ -47,6 +47,6 @@ runs:
       if: always()
       uses: ./.github/workflows/actions/upload-archive
       with:
-        name: test-results-${{ inputs.shard }}-${{ inputs.totalShards }}
+        name: test-core-screenshot (${{ inputs.shard }}, ${{ inputs.totalShards }})
         output: core/TestResults-${{ inputs.shard }}-${{ inputs.totalShards }}.zip
-        paths: core/test-results core/playwright-report
+        paths: core/playwright-report
