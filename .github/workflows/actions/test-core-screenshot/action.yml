@@ -48,7 +48,7 @@ runs:
       shell: bash
       working-directory: ./core
     - name: Push Snapshot Updates
-      if: inputs.update == "true"
+      if: inputs.update == 'true'
       run: |
         git config user.name github-actions
         git config user.email github-actions@github.com
@@ -64,7 +64,7 @@ runs:
       # even if the test fails in the previous
       # step, otherwise there would be no way
       # to debug these tests.
-      if: inputs.update != "true"
+      if: inputs.update != 'true'
       uses: ./.github/workflows/actions/upload-archive
       with:
         name: test-core-screenshot (${{ inputs.shard }}, ${{ inputs.totalShards }})
